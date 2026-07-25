@@ -53,7 +53,7 @@
                         <input type="email" id="register-email" name="email" required placeholder="your@email.com">
                     </div>
 
-                    <!-- NEW: Personal Details -->
+                    <!-- Personal Details -->
                     <div class="form-group">
                         <label for="register-country">Country of Origin</label>
                         <input type="text" id="register-country" name="country_of_origin" placeholder="e.g. Kenya">
@@ -74,7 +74,7 @@
                         <label for="register-address">Address</label>
                         <input type="text" id="register-address" name="address" placeholder="Street, City, Postal Code">
                     </div>
-                    <!-- END NEW -->
+                    <!-- END Personal Details -->
 
                     <div class="form-group">
                         <label for="register-password">Password</label>
@@ -99,28 +99,48 @@
     </footer>
 
     <script>
+        // Use local backend when testing on 127.0.0.1/localhost,
+        // otherwise use a relative path (same domain as deployed on Vercel)
+        const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+            ? "http://127.0.0.1:8000"
+            : "";
+
         function toggleForms() {
             const loginForm = document.getElementById('login-form');
-            const registerForm = document.querySelector('#register-form form').reset();
+            const registerForm = document.getElementById('register-form');
+            document.querySelector('#register-form form').reset();
             loginForm.classList.toggle('active');
             registerForm.classList.toggle('active');
+        }
+
+        // Helper: safely parse a response as JSON, and surface the real
+        // error (status code + raw body) if the server didn't return JSON.
+        async function parseJsonSafe(response) {
+            const text = await response.text();
+            try {
+                return { ok: response.ok, status: response.status, data: JSON.parse(text) };
+            } catch (e) {
+                throw new Error(
+                    `Server returned status ${response.status} (non-JSON response): ${text.slice(0, 200)}`
+                );
+            }
         }
 
         function handleLogin(event) {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            fetch('/api/login', {
+
+            fetch(`${API_BASE}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.access_token) {
+            .then(parseJsonSafe)
+            .then(({ ok, data }) => {
+                if (ok && data.access_token) {
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
@@ -130,7 +150,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Login failed. Please try again.');
+                alert('Login failed: ' + error.message);
             });
         }
 
@@ -141,7 +161,6 @@
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('register-confirm').value;
 
-            // NEW: read personal details fields
             const countryOfOrigin = document.getElementById('register-country').value;
             const dateOfBirth = document.getElementById('register-dob').value;
             const passportNumber = document.getElementById('register-passport').value;
@@ -153,7 +172,7 @@
                 return;
             }
 
-            fetch('http://127.0.0.1:8000/api/register', {
+            fetch(`${API_BASE}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -169,16 +188,9 @@
                     address: address
                 })
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.detail || 'Registration failed');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.id) {
+            .then(parseJsonSafe)
+            .then(({ ok, data }) => {
+                if (ok && data.id) {
                     alert('Account created successfully! Please login.');
                     document.getElementById('register-form').reset();
                     toggleForms();
