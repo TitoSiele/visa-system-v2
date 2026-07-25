@@ -21,6 +21,7 @@ from pydantic import BaseModel
 import models, crud, schemas
 import payments as mpesa
 import notifications
+import chatbot
 from database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
@@ -48,6 +49,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=True)
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False)
 
 
 class Token(BaseModel):
@@ -58,6 +60,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str
+
+
+class ChatMessage(BaseModel):
+    message: str
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -87,6 +93,19 @@ def get_authenticated_user(
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+
+def get_optional_user(
+    token: str = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db),
+):
+    if not token:
+        return None
+    try:
+        token_data = verify_token(token)
+        return crud.get_user_by_email(db, email=token_data.email)
+    except HTTPException:
+        return None
 
 
 def require_officer(user=Depends(get_authenticated_user)):
@@ -320,6 +339,20 @@ def get_document_file(
         raise HTTPException(status_code=404, detail="File missing on server")
 
     return FileResponse(doc.file_path)
+
+
+# =========================================================
+# CHATBOT
+# =========================================================
+
+@app.post("/api/chatbot")
+def chatbot_reply(
+    payload: ChatMessage,
+    user=Depends(get_optional_user),
+    db: Session = Depends(get_db),
+):
+    reply = chatbot.get_chatbot_response(payload.message, db, user=user)
+    return {"reply": reply}
 
 
 # =========================================================
