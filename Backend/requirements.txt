@@ -8,5 +8,5 @@ python-multipart
 python-jose
 requests
 africastalking
-email-validatorbcrypt
+email-validator
 bcrypt
