@@ -1,8 +1,14 @@
 import os
 import re
 import shutil
+import sys
 import uuid
 from datetime import datetime, timedelta, timezone
+
+# Ensure this directory is on sys.path so sibling modules
+# (models, crud, schemas, etc.) resolve correctly under Vercel's
+# runtime, where main.py may be imported without Backend/ on the path.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware

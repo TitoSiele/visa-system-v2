@@ -1,6 +1,10 @@
 {
   "builds": [
-    { "src": "Backend/main.py", "use": "@vercel/python" },
+    {
+      "src": "Backend/main.py",
+      "use": "@vercel/python",
+      "config": { "includeFiles": ["Backend/**"] }
+    },
     { "src": "Frontend/**", "use": "@vercel/static" }
   ],
   "routes": [
