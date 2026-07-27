@@ -45,6 +45,20 @@ def send_sms(phone_number: str, message: str) -> bool:
         return False
 
 
+def send_welcome_email(user):
+    subject = "Welcome to the Immigration Visa System"
+    body = (
+        f"Dear {user.full_name},\n\n"
+        f"Thank you for registering with the Immigration Visa System.\n"
+        f"You can now log in, start a visa application, upload your documents, "
+        f"and track your application status from your dashboard.\n\n"
+        f"If you have any questions, feel free to reach out to our support team.\n\n"
+        f"Regards,\nVisa Consultancy Team"
+    )
+    if user.email:
+        send_email(user.email, subject, body)
+
+
 def notify_status_change(user, application, new_status: str):
     subject = f"Application #{application.id} — Status Update"
     body = (

@@ -6,17 +6,24 @@
     <title>Dashboard - Immigration Visa System</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="page-dashboard">
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
             <div class="navbar-brand">
-                <h1>🌍 Immigration Visa System</h1>
+                <h1>🌍 Kenya Immigration Visa System</h1>
             </div>
             <ul class="navbar-menu" id="navbar-menu">
-                <li id="user-name">Welcome, User</li>
-                <li><a href="apply.html" class="btn btn-primary">New Application</a></li>
-                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary">Logout</a></li>
+                <li id="user-name" data-i18n="welcome_user">Welcome, User</li>
+                <li><a href="apply.html" class="btn btn-primary" data-i18n="nav_new_application">New Application</a></li>
+                <li><a href="biometrics.html" class="btn btn-secondary" data-i18n="nav_biometrics">Biometrics</a></li>
+                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary" data-i18n="nav_logout">Logout</a></li>
+                <li>
+                    <select id="lang-switcher" style="padding:6px; border-radius:6px;">
+                        <option value="en">English</option>
+                        <option value="sw">Kiswahili</option>
+                    </select>
+                </li>
             </ul>
         </div>
     </nav>
@@ -24,43 +31,54 @@
     <!-- Dashboard Content -->
     <div class="dashboard-container">
         <div class="container">
-            <h2>Your Applications</h2>
+            <h2 data-i18n="dashboard_title">Your Applications</h2>
 
             <!-- Quick Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <h3>Total Applications</h3>
+                    <h3 data-i18n="stat_total">Total Applications</h3>
                     <p class="stat-number" id="total-apps">0</p>
                 </div>
                 <div class="stat-card">
-                    <h3>Pending</h3>
+                    <h3 data-i18n="stat_pending">Pending</h3>
                     <p class="stat-number pending" id="pending-apps">0</p>
                 </div>
                 <div class="stat-card">
-                    <h3>Approved</h3>
+                    <h3 data-i18n="stat_approved">Approved</h3>
                     <p class="stat-number approved" id="approved-apps">0</p>
                 </div>
                 <div class="stat-card">
-                    <h3>Rejected</h3>
+                    <h3 data-i18n="stat_rejected">Rejected</h3>
                     <p class="stat-number rejected" id="rejected-apps">0</p>
+                </div>
+            </div>
+
+            <!-- Biometric Enrollment Shortcut -->
+            <div class="enrollment-section" style="margin-top: 24px; padding: 20px; border: 1px solid #dce6f0; border-radius: 10px; background: #f8fbff;">
+                <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; gap: 12px;">
+                    <div>
+                        <h3 data-i18n="biometric_enrollment_title">Biometric Enrollment</h3>
+                        <p data-i18n="biometric_enrollment_desc" style="margin: 8px 0 0; color: #555;">Enroll fingerprint or face biometrics from the dashboard for quicker login later.</p>
+                    </div>
+                    <a href="biometrics.html" class="btn btn-secondary" data-i18n="btn_open_biometrics">Open Biometrics</a>
                 </div>
             </div>
 
             <!-- Applications Table -->
             <div class="applications-section">
                 <div class="section-header">
-                    <h3>Your Visa Applications</h3>
-                    <a href="apply.html" class="btn btn-primary">Start New Application</a>
+                    <h3 data-i18n="applications_title">Your Visa Applications</h3>
+                    <a href="apply.html" class="btn btn-primary" data-i18n="btn_start_new">Start New Application</a>
                 </div>
 
                 <table class="applications-table">
                     <thead>
                         <tr>
-                            <th>Application ID</th>
-                            <th>Visa Type</th>
-                            <th>Status</th>
-                            <th>Submitted Date</th>
-                            <th>Actions</th>
+                            <th data-i18n="th_app_id">Application ID</th>
+                            <th data-i18n="th_visa_type">Visa Type</th>
+                            <th data-i18n="th_status">Status</th>
+                            <th data-i18n="th_submitted">Submitted Date</th>
+                            <th data-i18n="th_actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="applications-body">
@@ -80,6 +98,7 @@
         </div>
     </footer>
 
+    <script src="i18n.js"></script>
     <script>
         const API_BASE = 'http://127.0.0.1:8000';
 
@@ -87,7 +106,6 @@
             return localStorage.getItem('token');
         }
 
-        // Check authentication
         function checkAuth() {
             const token = getToken();
             if (!token) {
@@ -96,26 +114,22 @@
             }
         }
 
-        // Load user data
         function loadUserData() {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            document.getElementById('user-name').textContent = `Welcome, ${user.full_name || 'User'}`;
+            const welcomeText = I18N.t('welcome_user').replace('{name}', user.full_name || I18N.t('user_default'));
+            document.getElementById('user-name').textContent = welcomeText;
 
-            // Show Admin Panel link only for officer/admin roles
             if (user.role === 'officer' || user.role === 'admin') {
                 const navMenu = document.getElementById('navbar-menu');
                 const adminItem = document.createElement('li');
-                adminItem.innerHTML = '<a href="admin.html" class="btn btn-primary">Admin Panel</a>';
+                adminItem.innerHTML = `<a href="admin.html" class="btn btn-primary" data-i18n="nav_admin_panel">${I18N.t('nav_admin_panel')}</a>`;
                 navMenu.insertBefore(adminItem, navMenu.firstChild.nextSibling);
             }
         }
 
-        // Load applications
         function loadApplications() {
             const token = getToken();
 
-            // Token now goes in the Authorization header instead of the URL
-            // (query-string tokens end up in browser history and server logs).
             fetch(`${API_BASE}/api/applications`, {
                 method: 'GET',
                 headers: {
@@ -140,28 +154,33 @@
                 updateStats(data.applications || []);
             })
             .catch(error => {
-                console.error('Error loading applications:', error);
+                console.error(I18N.t('error_loading_applications'), error);
                 document.getElementById('applications-body').innerHTML =
-                    `<tr><td colspan="5" class="text-center">Error loading applications: ${error.message}</td></tr>`;
+                    `<tr><td colspan="5" class="text-center">${I18N.t('error_loading_applications')} ${error.message}</td></tr>`;
             });
+        }
+
+        function translateStatus(status) {
+            const key = `status_${status.toLowerCase().replace(/\s+/g, '_')}`;
+            return I18N.t(key) || status;
         }
 
         function displayApplications(applications) {
             const tbody = document.getElementById('applications-body');
 
             if (applications.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No applications yet. <a href="apply.html">Start one now</a></td></tr>';
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center">${I18N.t('no_applications_yet')} <a href="apply.html">${I18N.t('btn_start_new')}</a></td></tr>`;
                 return;
             }
 
             tbody.innerHTML = applications.map(app => `
                 <tr>
                     <td>#${app.id}</td>
-                    <td>${app.visa_type_name || 'Unknown'}</td>
-                    <td><span class="status-badge status-${app.status.toLowerCase().replace(/\s+/g, '-')}">${app.status}</span></td>
-                    <td>${app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : 'N/A'}</td>
+                    <td>${app.visa_type_name || I18N.t('status_unknown')}</td>
+                    <td><span class="status-badge status-${app.status.toLowerCase().replace(/\s+/g, '-')}">${translateStatus(app.status)}</span></td>
+                    <td>${app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : I18N.t('not_applicable')}</td>
                     <td>
-                        <a href="status.html?id=${app.id}" class="btn btn-small">View</a>
+                        <a href="status.html?id=${app.id}" class="btn btn-small" data-i18n="btn_view">${I18N.t('btn_view')}</a>
                     </td>
                 </tr>
             `).join('');
@@ -185,11 +204,56 @@
             window.location.href = 'login.html';
         }
 
+        // --- Fingerprint (WebAuthn) ---
+        function bufferToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let str = '';
+            for (const b of bytes) str += String.fromCharCode(b);
+            return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function base64urlToBuffer(base64url) {
+            const padded = base64url.replace(/-/g, '+').replace(/_/g, '/').padEnd(
+                base64url.length + ((4 - (base64url.length % 4)) % 4), '='
+            );
+            const raw = atob(padded);
+            const buffer = new ArrayBuffer(raw.length);
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+            return buffer;
+        }
+
+        function credentialToJSON(cred, isRegistration) {
+            const base = { id: cred.id, rawId: bufferToBase64url(cred.rawId), type: cred.type };
+            if (isRegistration) {
+                base.response = {
+                    attestationObject: bufferToBase64url(cred.response.attestationObject),
+                    clientDataJSON: bufferToBase64url(cred.response.clientDataJSON)
+                };
+            } else {
+                base.response = {
+                    authenticatorData: bufferToBase64url(cred.response.authenticatorData),
+                    clientDataJSON: bufferToBase64url(cred.response.clientDataJSON),
+                    signature: bufferToBase64url(cred.response.signature),
+                    userHandle: cred.response.userHandle ? bufferToBase64url(cred.response.userHandle) : null
+                };
+            }
+            return base;
+        }
+
+        function initFingerprintWidget() {
+            const widget = document.getElementById('fp-widget');
+            if (!widget) {
+                return;
+            }
+        }
+
         // Initialize on page load
         window.addEventListener('load', () => {
             checkAuth();
             loadUserData();
             loadApplications();
+            initFingerprintWidget();
         });
 
         // Auto-refresh every 30 seconds

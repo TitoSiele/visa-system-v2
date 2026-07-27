@@ -1,0 +1,25 @@
+# Local environment file
+.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+.venvh/
+.venvm/
+
+# Uploaded documents and temporary uploads
+Backend/uploaded_documents/
+
+# VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

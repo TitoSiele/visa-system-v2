@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Register - Immigration Visa System</title>
+    <title>Login / Register - Kenya Immigration Visa System</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="page-login">
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
             <div class="navbar-brand">
-                <h1>🌍 Immigration Visa System</h1>
+                <h1>🌍 Kenya Immigration Visa System</h1>
             </div>
             <ul class="navbar-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="index.html#visa-types">Visa Types</a></li>
+                <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+                <li><a href="index.html#visa-types" data-i18n="nav_visa_types">Visa Types</a></li>
+                <li>
+                    <select id="lang-switcher" style="padding:6px; border-radius:6px;">
+                        <option value="en">English</option>
+                        <option value="sw">Kiswahili</option>
+                    </select>
+                </li>
             </ul>
         </div>
     </nav>
@@ -25,68 +31,89 @@
         <div class="auth-wrapper">
             <!-- Login Form -->
             <div id="login-form" class="auth-form active">
-                <h2>Login</h2>
+                <h2 data-i18n="login_title">Login</h2>
                 <form onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <label for="login-email">Email Address</label>
-                        <input type="email" id="login-email" name="email" required placeholder="your@email.com">
+                        <label for="login-email" data-i18n="login_email_label">Email Address</label>
+                        <input type="email" id="login-email" name="email" required placeholder="your@email.com" data-i18n-placeholder="placeholder_email">
                     </div>
                     <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+                        <label for="login-password" data-i18n="login_password_label">Password</label>
+                        <input type="password" id="login-password" name="password" required placeholder="Enter your password" data-i18n-placeholder="placeholder_password">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    <button type="submit" class="btn btn-primary btn-block" data-i18n="btn_login">Login</button>
                 </form>
-                <p class="toggle-text">Don't have an account? <a href="#" onclick="toggleForms()">Register here</a></p>
+
+                <div id="biometric-login-note" style="margin-top: 20px; padding: 16px; border: 1px solid #dce6f0; border-radius: 8px; background: #f8fbff;">
+                    <h3 style="margin: 0 0 8px 0;" data-i18n="biometric_optional_title">Biometrics are optional</h3>
+                    <p class="form-help" data-i18n="biometric_optional_desc">Your email/password login works as usual. Biometrics can be added later from your dashboard once you are signed in.</p>
+                </div>
+
+                <div id="biometric-login-panel" style="margin-top: 20px; padding: 16px; border: 1px solid #dce6f0; border-radius: 8px; background: #f8fbff;">
+                    <h3 style="margin: 0 0 8px 0;" data-i18n="biometric_login_title">Biometric login</h3>
+                    <p class="form-help" data-i18n="biometric_login_desc">If you've enrolled biometrics from the dashboard, use them to sign in here.</p>
+                    <div class="form-group">
+                        <label for="bio-login-email" data-i18n="label_bio_email">Email</label>
+                        <input type="email" id="bio-login-email" placeholder="Enter email used for enrollment" data-i18n-placeholder="placeholder_bio_email" style="width: 100%; padding: 10px; margin-top: 6px;" />
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary" id="bio-login-fingerprint" data-i18n="btn_fingerprint_login">Fingerprint login</button>
+                        <button type="button" class="btn btn-secondary" id="bio-login-face" data-i18n="btn_face_login">Face login</button>
+                    </div>
+                    <p id="biometric-login-panel-status" class="form-help" style="margin-top:10px;" data-i18n="biometric_login_status">Use password login normally, or use enrolled biometrics here.</p>
+                    <video id="bio-login-video" autoplay playsinline width="280" height="210" style="display:none; border-radius:8px; background:#000; margin-top:10px;"></video>
+                    <canvas id="bio-login-canvas" width="280" height="210" style="display:none;"></canvas>
+                </div>
+                <p class="toggle-text"><span data-i18n="login_no_account">Don't have an account?</span> <a href="#" onclick="toggleForms()" data-i18n="register_here">Register here</a></p>
             </div>
 
             <!-- Register Form -->
             <div id="register-form" class="auth-form">
-                <h2>Create Account</h2>
+                <h2 data-i18n="register_title">Create Account</h2>
                 <form onsubmit="handleRegister(event)">
                     <div class="form-group">
-                        <label for="register-name">Full Name</label>
-                        <input type="text" id="register-name" name="full_name" required placeholder="John Doe">
+                        <label for="register-name" data-i18n="label_full_name">Full Name</label>
+                        <input type="text" id="register-name" name="full_name" required placeholder="John Doe" data-i18n-placeholder="placeholder_full_name">
                     </div>
                     <div class="form-group">
-                        <label for="register-email">Email Address</label>
-                        <input type="email" id="register-email" name="email" required placeholder="your@email.com">
+                        <label for="register-email" data-i18n="login_email_label">Email Address</label>
+                        <input type="email" id="register-email" name="email" required placeholder="your@email.com" data-i18n-placeholder="placeholder_email">
                     </div>
 
                     <!-- Personal Details -->
                     <div class="form-group">
-                        <label for="register-country">Country of Origin</label>
-                        <input type="text" id="register-country" name="country_of_origin" placeholder="e.g. Kenya">
+                        <label for="register-country" data-i18n="label_country_of_origin">Country of Origin</label>
+                        <input type="text" id="register-country" name="country_of_origin" placeholder="e.g. Kenya" data-i18n-placeholder="placeholder_country_of_origin">
                     </div>
                     <div class="form-group">
-                        <label for="register-dob">Date of Birth</label>
+                        <label for="register-dob" data-i18n="label_date_of_birth">Date of Birth</label>
                         <input type="date" id="register-dob" name="date_of_birth">
                     </div>
                     <div class="form-group">
-                        <label for="register-passport">Passport Number</label>
-                        <input type="text" id="register-passport" name="passport_number" placeholder="e.g. A12345678">
+                        <label for="register-passport" data-i18n="label_passport_number">Passport Number</label>
+                        <input type="text" id="register-passport" name="passport_number" placeholder="e.g. A12345678" data-i18n-placeholder="placeholder_passport_number">
                     </div>
                     <div class="form-group">
-                        <label for="register-phone">Phone Number</label>
-                        <input type="tel" id="register-phone" name="phone_number" placeholder="e.g. +254712345678">
+                        <label for="register-phone" data-i18n="label_phone_number">Phone Number</label>
+                        <input type="tel" id="register-phone" name="phone_number" placeholder="e.g. +254712345678" data-i18n-placeholder="placeholder_phone_number">
                     </div>
                     <div class="form-group">
-                        <label for="register-address">Address</label>
-                        <input type="text" id="register-address" name="address" placeholder="Street, City, Postal Code">
+                        <label for="register-address" data-i18n="label_address">Address</label>
+                        <input type="text" id="register-address" name="address" placeholder="Street, City, Postal Code" data-i18n-placeholder="placeholder_address">
                     </div>
                     <!-- END Personal Details -->
 
                     <div class="form-group">
-                        <label for="register-password">Password</label>
-                        <input type="password" id="register-password" name="password" required placeholder="Choose a strong password">
+                        <label for="register-password" data-i18n="login_password_label">Password</label>
+                        <input type="password" id="register-password" name="password" required placeholder="Choose a strong password (min. 8 characters)" data-i18n-placeholder="placeholder_new_password">
                     </div>
                     <div class="form-group">
-                        <label for="register-confirm">Confirm Password</label>
-                        <input type="password" id="register-confirm" name="confirm_password" required placeholder="Confirm your password">
+                        <label for="register-confirm" data-i18n="label_confirm_password">Confirm Password</label>
+                        <input type="password" id="register-confirm" name="confirm_password" required placeholder="Confirm your password" data-i18n-placeholder="placeholder_confirm_password">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                    <button type="submit" class="btn btn-primary btn-block" data-i18n="btn_create_account">Create Account</button>
                 </form>
-                <p class="toggle-text">Already have an account? <a href="#" onclick="toggleForms()">Login here</a></p>
+                <p class="toggle-text"><span data-i18n="register_have_account">Already have an account?</span> <a href="#" onclick="toggleForms()" data-i18n="login_here">Login here</a></p>
             </div>
         </div>
     </div>
@@ -98,6 +125,7 @@
         </div>
     </footer>
 
+    <script src="i18n.js"></script>
     <script>
         // Use local backend when testing on 127.0.0.1/localhost,
         // otherwise use a relative path (same domain as deployed on Vercel)
@@ -126,6 +154,384 @@
             }
         }
 
+        // Helper: FastAPI validation errors return `detail` as an array of
+        // objects (e.g. [{msg: "...", loc: [...], type: "..."}]) rather than
+        // a plain string. This turns that into a readable message instead
+        // of "[object Object]".
+        function extractErrorMessage(data, fallback) {
+            if (!data) return fallback;
+            if (Array.isArray(data.detail)) {
+                return data.detail.map(d => d.msg || JSON.stringify(d)).join('; ');
+            }
+            if (typeof data.detail === 'string') {
+                return data.detail;
+            }
+            return fallback;
+        }
+
+        function bufferToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let str = '';
+            for (const b of bytes) str += String.fromCharCode(b);
+            return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function base64urlToBuffer(base64url) {
+            const padded = base64url.replace(/-/g, '+').replace(/_/g, '/').padEnd(
+                base64url.length + ((4 - (base64url.length % 4)) % 4), '='
+            );
+            const raw = atob(padded);
+            const buffer = new ArrayBuffer(raw.length);
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+            return buffer;
+        }
+
+        function credentialToJSON(cred, isRegistration = false) {
+            const base = { id: cred.id, rawId: bufferToBase64url(cred.rawId), type: cred.type };
+            if (cred.response) {
+                base.response = {
+                    clientDataJSON: bufferToBase64url(cred.response.clientDataJSON)
+                };
+                if (isRegistration) {
+                    base.response.attestationObject = bufferToBase64url(cred.response.attestationObject);
+                } else {
+                    base.response.authenticatorData = bufferToBase64url(cred.response.authenticatorData);
+                    base.response.signature = bufferToBase64url(cred.response.signature);
+                    base.response.userHandle = cred.response.userHandle ? bufferToBase64url(cred.response.userHandle) : null;
+                }
+            }
+            return base;
+        }
+
+        async function getUserIdByEmail(email) {
+            const response = await fetch(`${API_BASE}/api/users/by-email/${encodeURIComponent(email)}`);
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || 'User not found');
+            }
+            const data = await response.json();
+            return data.id;
+        }
+
+        async function authenticateBiometric(email, method) {
+            const response = await fetch(`${API_BASE}/api/login/biometric`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, method })
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || 'Biometric login failed');
+            }
+            return response.json();
+        }
+
+        async function verifyFaceBiometric(userId, blob) {
+            if (!blob) {
+                throw new Error('Face photo is required for verification');
+            }
+            const formData = new FormData();
+            formData.append('photo', blob, 'face.jpg');
+            const response = await fetch(`${API_BASE}/api/users/${userId}/biometrics/face/verify`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || 'Face verification failed');
+            }
+            return response.json();
+        }
+
+        async function loginWithFingerprintBiometric() {
+            const status = document.getElementById('biometric-login-panel-status');
+            const email = document.getElementById('bio-login-email').value.trim();
+            if (!email) {
+                status.textContent = 'Enter your email before attempting fingerprint login.';
+                return;
+            }
+
+            try {
+                const userId = await getUserIdByEmail(email);
+                status.textContent = 'Starting fingerprint authentication...';
+                const startRes = await fetch(`${API_BASE}/api/users/${userId}/biometrics/fingerprint/verify/start`, {
+                    method: 'POST'
+                });
+                if (!startRes.ok) {
+                    const err = await startRes.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Could not start fingerprint verification');
+                }
+                const { publicKey } = await startRes.json();
+                publicKey.challenge = base64urlToBuffer(publicKey.challenge);
+                publicKey.allowCredentials = publicKey.allowCredentials?.map(c => ({
+                    ...c,
+                    id: base64urlToBuffer(c.id)
+                })) || [];
+                const assertion = await navigator.credentials.get({ publicKey });
+                const credential = credentialToJSON(assertion, false);
+                const finishRes = await fetch(`${API_BASE}/api/users/${userId}/biometrics/fingerprint/verify/finish`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential })
+                });
+                if (!finishRes.ok) {
+                    const err = await finishRes.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Fingerprint verify failed');
+                }
+                const tokenData = await authenticateBiometric(email, 'fingerprint');
+                localStorage.setItem('token', tokenData.access_token);
+                localStorage.setItem('user', JSON.stringify(tokenData.user));
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                status.textContent = 'Fingerprint login failed: ' + err.message;
+            }
+        }
+
+        async function loginWithFaceBiometric() {
+            const status = document.getElementById('biometric-login-panel-status');
+            const email = document.getElementById('bio-login-email').value.trim();
+            if (!email) {
+                status.textContent = 'Enter your email before attempting face login.';
+                return;
+            }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                status.textContent = 'Your browser does not support camera access.';
+                return;
+            }
+
+            try {
+                const userId = await getUserIdByEmail(email);
+                status.textContent = 'Opening camera for face login...';
+                const video = document.getElementById('bio-login-video');
+                const canvas = document.getElementById('bio-login-canvas');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                await new Promise(resolve => video.onloadedmetadata = resolve);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                stream.getTracks().forEach(track => track.stop());
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+                if (!blob) throw new Error('Unable to capture face photo');
+                status.textContent = 'Verifying face biometric...';
+                await verifyFaceBiometric(userId, blob);
+                const tokenData = await authenticateBiometric(email, 'face');
+                localStorage.setItem('token', tokenData.access_token);
+                localStorage.setItem('user', JSON.stringify(tokenData.user));
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                status.textContent = 'Face login failed: ' + err.message;
+            }
+        }
+
+        async function initBiometricLoginButtons() {
+            const fingerprintBtn = document.getElementById('bio-login-fingerprint');
+            const faceBtn = document.getElementById('bio-login-face');
+            if (fingerprintBtn) fingerprintBtn.addEventListener('click', loginWithFingerprintBiometric);
+            if (faceBtn) faceBtn.addEventListener('click', loginWithFaceBiometric);
+        }
+
+        async function uploadFaceBiometric(action, userId, token, blob) {
+            const formData = new FormData();
+            formData.append('photo', blob, 'face.jpg');
+            const response = await fetch(`${API_BASE}/api/users/${userId}/biometrics/face/${action}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || `Face ${action} failed`);
+            }
+            return response.json();
+        }
+
+        async function enrollFingerprint(userId, token) {
+            if (!window.PublicKeyCredential || !navigator.credentials || !navigator.credentials.create) {
+                throw new Error('This browser does not support fingerprint enrollment.');
+            }
+
+            const startRes = await fetch(`${API_BASE}/api/users/${userId}/biometrics/fingerprint/register/start`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!startRes.ok) {
+                const err = await startRes.json().catch(() => ({}));
+                throw new Error(err.detail || 'Failed to start fingerprint enrollment');
+            }
+            const { publicKey } = await startRes.json();
+            publicKey.challenge = base64urlToBuffer(publicKey.challenge);
+            if (typeof publicKey.user?.id === 'string') {
+                publicKey.user.id = base64urlToBuffer(publicKey.user.id);
+            }
+            const credential = await navigator.credentials.create({ publicKey });
+            const credentialJSON = credentialToJSON(credential, true);
+            const finishRes = await fetch(`${API_BASE}/api/users/${userId}/biometrics/fingerprint/register/finish`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ credential: credentialJSON })
+            });
+            if (!finishRes.ok) {
+                const err = await finishRes.json().catch(() => ({}));
+                throw new Error(err.detail || 'Fingerprint enrollment failed');
+            }
+            return finishRes.json();
+        }
+
+        function initBiometricWidget() {
+            const widget = document.getElementById('biometric-login-widget');
+            if (!widget) return;
+
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userId = user.id;
+            const token = localStorage.getItem('token');
+            const status = document.getElementById('biometric-login-status');
+            const widgetLocked = document.getElementById('biometric-locked-message');
+            const successActions = document.getElementById('login-success-actions');
+            const startBtn = document.getElementById('biometric-login-start');
+            const captureBtn = document.getElementById('biometric-login-capture');
+            const retakeBtn = document.getElementById('biometric-login-retake');
+            const video = document.getElementById('biometric-login-video');
+            const canvas = document.getElementById('biometric-login-canvas');
+            const preview = document.getElementById('biometric-login-preview');
+            const passwordBtn = document.getElementById('method-password');
+            const fingerprintBtn = document.getElementById('method-fingerprint');
+            const faceBtn = document.getElementById('method-face');
+
+            let stream = null;
+            let capturedBlob = null;
+            let selectedMethod = 'password';
+
+            const canSaveBiometric = Boolean(userId && token);
+            if (!canSaveBiometric) {
+                if (widget) widget.style.display = 'none';
+                if (widgetLocked) widgetLocked.style.display = 'block';
+                status.textContent = '';
+                if (successActions) successActions.style.display = 'none';
+                startBtn.disabled = true;
+                captureBtn.disabled = true;
+                return;
+            }
+
+            if (widget) widget.style.display = 'block';
+            if (widgetLocked) widgetLocked.style.display = 'none';
+            if (successActions) successActions.style.display = 'inline-block';
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                startBtn.disabled = true;
+                status.textContent = 'Your browser does not support webcam access for face verification.';
+            } else {
+                startBtn.disabled = false;
+            }
+            captureBtn.disabled = true;
+
+            function setMethod(method) {
+                selectedMethod = method;
+                const labels = {
+                    password: 'Password login is available. Use the regular login form above.',
+                    fingerprint: 'Fingerprint enrollment is ready. Use your device scanner when prompted.',
+                    face: 'Face enrollment is ready. Start the camera and capture your photo.'
+                };
+                if (method === 'fingerprint') {
+                    captureBtn.disabled = false;
+                    captureBtn.style.display = 'inline-block';
+                    preview.style.display = 'none';
+                    video.style.display = 'none';
+                    retakeBtn.style.display = 'none';
+                } else if (method === 'face') {
+                    captureBtn.disabled = !stream;
+                    captureBtn.style.display = 'inline-block';
+                    retakeBtn.style.display = 'none';
+                }
+                status.textContent = labels[method] || 'Select a method to continue.';
+            }
+
+            passwordBtn.addEventListener('click', () => setMethod('password'));
+            fingerprintBtn.addEventListener('click', () => setMethod('fingerprint'));
+            faceBtn.addEventListener('click', () => setMethod('face'));
+
+            async function startCamera() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    status.textContent = 'Your browser does not support webcam access for face verification.';
+                    return;
+                }
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    preview.style.display = 'none';
+                    captureBtn.disabled = false;
+                    captureBtn.style.display = 'inline-block';
+                    status.textContent = 'Camera ready. Position your face and click Capture.';
+                } catch (err) {
+                    status.textContent = 'Camera access was blocked: ' + err.message;
+                }
+            }
+
+            function resetPreview() {
+                capturedBlob = null;
+                preview.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                captureBtn.disabled = true;
+                retakeBtn.style.display = 'none';
+                status.textContent = 'Click Start Camera to capture a new face photo.';
+            }
+
+            startBtn.addEventListener('click', startCamera);
+            retakeBtn.addEventListener('click', resetPreview);
+
+            captureBtn.addEventListener('click', async () => {
+                if (selectedMethod === 'fingerprint') {
+                    if (!userId || !token) {
+                        status.textContent = 'Sign in to save your fingerprint biometric.';
+                        return;
+                    }
+                    status.textContent = 'Starting fingerprint enrollment...';
+                    try {
+                        await enrollFingerprint(userId, token);
+                        status.textContent = 'Fingerprint enrolled successfully.';
+                    } catch (err) {
+                        status.textContent = 'Fingerprint enrollment failed: ' + err.message;
+                    }
+                    return;
+                }
+
+                if (!video || !canvas) return;
+                if (!userId || !token) {
+                    status.textContent = 'Sign in to save your face biometric.';
+                    return;
+                }
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(async (blob) => {
+                    capturedBlob = blob;
+                    preview.src = URL.createObjectURL(blob);
+                    preview.style.display = 'block';
+                    video.style.display = 'none';
+                    captureBtn.style.display = 'none';
+                    retakeBtn.style.display = 'inline-block';
+                    status.textContent = 'Processing your face enrollment...';
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+
+                    try {
+                        if (selectedMethod === 'face') {
+                            await uploadFaceBiometric('register', userId, token, blob);
+                            status.textContent = 'Face biometric enrolled successfully.';
+                        } else {
+                            status.textContent = 'Select fingerprint or face to enroll.';
+                        }
+                    } catch (err) {
+                        status.textContent = 'Face enrollment failed: ' + err.message;
+                    }
+                }, 'image/jpeg', 0.9);
+            });
+
+            status.textContent = 'Select a method to enroll or use for sign-in.';
+        }
+
         function handleLogin(event) {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -143,9 +549,13 @@
                 if (ok && data.access_token) {
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
+                    const status = document.getElementById('biometric-login-panel-status');
+                    if (status) {
+                        status.textContent = 'Login successful. You can use biometrics later for extra security.';
+                    }
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert('Login failed: ' + (data.detail || 'Unknown error'));
+                    alert('Login failed: ' + extractErrorMessage(data, 'Unknown error'));
                 }
             })
             .catch(error => {
@@ -172,6 +582,11 @@
                 return;
             }
 
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long.');
+                return;
+            }
+
             fetch(`${API_BASE}/api/register`, {
                 method: 'POST',
                 headers: {
@@ -195,7 +610,7 @@
                     document.getElementById('register-form').reset();
                     toggleForms();
                 } else {
-                    alert('Registration failed: ' + (data.detail || 'Unknown error'));
+                    alert('Registration failed: ' + extractErrorMessage(data, 'Unknown error'));
                 }
             })
             .catch(error => {
@@ -204,13 +619,18 @@
             });
         }
 
-        // Check if already logged in
+        // Keep the normal login flow intact; biometrics remain optional.
         window.addEventListener('load', () => {
             const token = localStorage.getItem('token');
             if (token) {
                 window.location.href = 'dashboard.html';
+                return;
             }
+            initBiometricLoginButtons();
         });
     </script>
+
+    <!-- Chatbot widget -->
+    <script src="chatbot.js"></script>
 </body>
 </html>

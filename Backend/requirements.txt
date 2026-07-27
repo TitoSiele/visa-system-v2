@@ -9,4 +9,5 @@ python-jose
 requests
 africastalking
 email-validator
-bcrypt
+bcrypt==4.0.1
+python-dotenv

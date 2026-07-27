@@ -1,12 +1,7 @@
 # seed_visa_types.py
-#
-# HOW TO USE:
-# Copy the function below into your main.py (or import and call it),
-# right after the line:
-#     models.Base.metadata.create_all(bind=engine)
-#
-# Then call seed_visa_types() once before the "app = FastAPI(...)" line,
-# or anywhere during startup, so the visa_types table always has data.
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from sqlalchemy.orm import Session
 from database import SessionLocal

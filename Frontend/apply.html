@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Application - Immigration Visa System</title>
+    <title>New Application - Kenya Immigration Visa System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,11 +11,17 @@
     <nav class="navbar">
         <div class="container">
             <div class="navbar-brand">
-                <h1>🌍 Immigration Visa System</h1>
+                <h1>🌍 Kenya Immigration Visa System</h1>
             </div>
             <ul class="navbar-menu">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary">Logout</a></li>
+                <li><a href="dashboard.html" data-i18n="nav_dashboard">Dashboard</a></li>
+                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary" data-i18n="nav_logout">Logout</a></li>
+                <li>
+                    <select id="lang-switcher" style="padding:6px; border-radius:6px;">
+                        <option value="en">English</option>
+                        <option value="sw">Kiswahili</option>
+                    </select>
+                </li>
             </ul>
         </div>
     </nav>
@@ -24,16 +30,16 @@
     <div class="form-container">
         <div class="container">
             <div class="form-wrapper">
-                <h2>Create New Visa Application</h2>
+                <h2 data-i18n="apply_title">Create New Visa Application</h2>
                 <form id="application-form" onsubmit="handleApplicationSubmit(event)">
 
                     <!-- Step 1: Select Visa Type -->
                     <div class="form-section">
-                        <h3>Step 1: Select Visa Type</h3>
-                        <p class="form-help">Choose the type of visa you are applying for</p>
+                        <h3 data-i18n="step1_title">Step 1: Select Visa Type</h3>
+                        <p class="form-help" data-i18n="step1_help">Choose the type of visa you are applying for</p>
 
                         <div class="form-group">
-                            <label for="visa-type">Visa Type *</label>
+                            <label for="visa-type" data-i18n="label_visa_type">Visa Type *</label>
                             <select id="visa-type" name="visa_type_id" required onchange="loadVisaRequirements()">
                                 <option value="">-- Select Visa Type --</option>
                             </select>
@@ -42,8 +48,8 @@
 
                     <!-- Step 2: Visa Requirements -->
                     <div class="form-section" id="requirements-section" style="display: none;">
-                        <h3>Step 2: Required Documents</h3>
-                        <p class="form-help">Please check all required documents you will upload</p>
+                        <h3 data-i18n="step2_title">Step 2: Required Documents</h3>
+                        <p class="form-help" data-i18n="step2_help">Please check all required documents you will upload</p>
 
                         <div id="requirements-list" class="document-list">
                             <!-- Dynamically populated -->
@@ -52,33 +58,51 @@
 
                     <!-- Step 3: Document Upload -->
                     <div class="form-section" id="upload-section" style="display: none;">
-                        <h3>Step 3: Upload Documents</h3>
-                        <p class="form-help">Upload supporting documents for your application</p>
+                        <h3 data-i18n="step3_title">Step 3: Upload Documents</h3>
+                        <p class="form-help" data-i18n="step3_help">Upload supporting documents for your application</p>
 
                         <div id="upload-fields" class="upload-fields">
                             <!-- Dynamically populated -->
                         </div>
                     </div>
 
-                    <!-- Step 4: Review & Submit -->
+                    <!-- Step 4: Biometric Photo -->
                     <div class="form-section">
-                        <h3>Step 4: Review & Submit</h3>
+                        <h3 data-i18n="step4_title">Step 4: Identity Photo</h3>
+                        <p class="form-help" data-i18n="step4_help">Take a clear photo of your face using your camera. This will be attached to your application for identity verification.</p>
+
+                        <div id="biometric-capture">
+                            <video id="bc-video" autoplay playsinline width="320" height="240" style="display:none; border-radius:8px; background:#000;"></video>
+                            <canvas id="bc-canvas" width="320" height="240" style="display:none;"></canvas>
+                            <img id="bc-preview" style="display:none; max-width:320px; border-radius:8px;" />
+                            <div style="margin-top:10px;">
+                                <button type="button" class="btn btn-secondary" id="bc-start" data-i18n="btn_start_camera">Start Camera</button>
+                                <button type="button" class="btn btn-primary" id="bc-capture" disabled data-i18n="btn_capture_photo">Capture Photo</button>
+                                <button type="button" class="btn btn-secondary" id="bc-retake" style="display:none;" data-i18n="btn_retake">Retake</button>
+                            </div>
+                            <p id="bc-status" class="form-help"></p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Review & Submit -->
+                    <div class="form-section">
+                        <h3 data-i18n="step5_title">Step 5: Review & Submit</h3>
                         <div class="checkbox-group">
                             <label>
                                 <input type="checkbox" name="terms" required>
-                                I confirm that all information provided is accurate and true
+                                <span data-i18n="confirm_accurate">I confirm that all information provided is accurate and true</span>
                             </label>
                             <label>
                                 <input type="checkbox" name="privacy" required>
-                                I agree to the Privacy Policy and Terms of Service
+                                <span data-i18n="confirm_privacy">I agree to the Privacy Policy and Terms of Service</span>
                             </label>
                         </div>
                     </div>
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <a href="dashboard.html" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary" id="submit-btn">Submit Application</button>
+                        <a href="dashboard.html" class="btn btn-secondary" data-i18n="btn_cancel">Cancel</a>
+                        <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="btn_submit">Submit Application</button>
                     </div>
                 </form>
             </div>
@@ -92,6 +116,7 @@
         </div>
     </footer>
 
+    <script src="i18n.js"></script>
     <script>
         const API_BASE = 'http://127.0.0.1:8000';
         // Must match the backend's ALLOWED_UPLOAD_EXTENSIONS / MAX_UPLOAD_BYTES in main.py
@@ -99,6 +124,8 @@
         const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
 
         let visaTypesData = {};
+        let capturedPhotoBlob = null;
+        let cameraStream = null;
 
         function getToken() {
             return localStorage.getItem('token');
@@ -149,8 +176,6 @@
             `).join('');
 
             // Populate upload fields
-            // NOTE: accept is now limited to pdf/jpg/jpeg/png because that's all
-            // the backend will store (see ALLOWED_UPLOAD_EXTENSIONS in main.py).
             const uploadFields = document.getElementById('upload-fields');
             uploadFields.innerHTML = requirements.map((doc, idx) => `
                 <div class="form-group">
@@ -178,6 +203,73 @@
             return true;
         }
 
+        // --- Biometric photo capture ---
+        function initBiometricCapture() {
+            const video = document.getElementById('bc-video');
+            const canvas = document.getElementById('bc-canvas');
+            const preview = document.getElementById('bc-preview');
+            const startBtn = document.getElementById('bc-start');
+            const captureBtn = document.getElementById('bc-capture');
+            const retakeBtn = document.getElementById('bc-retake');
+            const status = document.getElementById('bc-status');
+
+            startBtn.addEventListener('click', async () => {
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = cameraStream;
+                    video.style.display = 'block';
+                    preview.style.display = 'none';
+                    captureBtn.disabled = false;
+                    startBtn.disabled = true;
+                    status.textContent = 'Camera ready. Position your face in frame and click Capture.';
+                } catch (err) {
+                    status.textContent = 'Could not access camera: ' + err.message;
+                }
+            });
+
+            captureBtn.addEventListener('click', () => {
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => {
+                    capturedPhotoBlob = blob;
+                    preview.src = URL.createObjectURL(blob);
+                    preview.style.display = 'block';
+                    video.style.display = 'none';
+                    captureBtn.style.display = 'none';
+                    retakeBtn.style.display = 'inline-block';
+                    status.textContent = 'Photo captured. You can retake it or continue to submit.';
+                    if (cameraStream) {
+                        cameraStream.getTracks().forEach(t => t.stop());
+                    }
+                }, 'image/jpeg', 0.9);
+            });
+
+            retakeBtn.addEventListener('click', () => {
+                capturedPhotoBlob = null;
+                preview.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                captureBtn.disabled = true;
+                retakeBtn.style.display = 'none';
+                startBtn.disabled = false;
+                status.textContent = 'Click Start Camera to retake your photo.';
+            });
+        }
+
+        async function uploadBiometricPhoto(applicationId, token) {
+            if (!capturedPhotoBlob) return; // photo is optional; skip silently if not captured
+            const formData = new FormData();
+            formData.append('photo', capturedPhotoBlob, 'photo.jpg');
+            const res = await fetch(`${API_BASE}/api/applications/${applicationId}/biometrics/photo`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                console.error('Photo upload failed:', err.detail || res.status);
+            }
+        }
+
         async function handleApplicationSubmit(event) {
             event.preventDefault();
 
@@ -201,8 +293,6 @@
             submitBtn.textContent = 'Submitting...';
 
             try {
-                // Token now goes in the Authorization header; visa_type_id stays
-                // as a query param since it isn't sensitive.
                 const appResponse = await fetch(`${API_BASE}/api/applications?visa_type_id=${visaTypeId}`, {
                     method: 'POST',
                     headers: {
@@ -243,6 +333,8 @@
                     }
                 }
 
+                await uploadBiometricPhoto(appData.id, token);
+
                 alert('Application submitted successfully!');
                 window.location.href = 'dashboard.html';
             } catch (error) {
@@ -264,7 +356,11 @@
         window.addEventListener('load', () => {
             checkAuth();
             fetchVisaTypes();
+            initBiometricCapture();
         });
     </script>
+
+    <!-- Chatbot widget -->
+    <script src="chatbot.js"></script>
 </body>
 </html>

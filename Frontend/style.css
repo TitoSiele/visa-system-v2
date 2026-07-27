@@ -930,3 +930,69 @@ section h2 {
         left: -5px;
     }
 }
+/* Hero flex layout with image */
+.hero-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+    text-align: left;
+}
+
+.hero-flex .hero-content {
+    flex: 1;
+}
+
+.hero-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.hero-image img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 768px) {
+    .hero-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Subtle polish */
+.navbar-brand h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.visa-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+/* Page background image */
+body.page-login,
+body.page-dashboard {
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* Let the background show through on the dashboard instead of a flat color */
+.page-dashboard .dashboard-container {
+    background-color: rgba(248, 250, 252, 0.85);
+}
+
+/* Homepage hero: background photo with a tinted overlay so text stays readable */
+.page-index .hero {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.85), rgba(30, 64, 175, 0.85)),
+                url('background.jpg');
+    background-size: cover;
+    background-position: center;
+}

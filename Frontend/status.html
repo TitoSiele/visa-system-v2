@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application Status - Immigration Visa System</title>
+    <title>Application Status - Kenya Immigration Visa System</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .payment-section {
@@ -40,8 +40,14 @@
                 <h1>🌍 Immigration Visa System</h1>
             </div>
             <ul class="navbar-menu">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary">Logout</a></li>
+                <li><a href="dashboard.html" data-i18n="nav_dashboard">Dashboard</a></li>
+                <li>
+                    <select id="lang-switcher" style="padding:6px; border-radius:6px;">
+                        <option value="en">English</option>
+                        <option value="sw">Kiswahili</option>
+                    </select>
+                </li>
+                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary" data-i18n="nav_logout">Logout</a></li>
             </ul>
         </div>
     </nav>
@@ -49,22 +55,21 @@
     <!-- Application Status -->
     <div class="status-container">
         <div class="container">
-            <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+                <a href="dashboard.html" class="back-link" data-i18n="back_to_dashboard">← Back to Dashboard</a>
 
-            <div class="status-card">
-                <div class="status-header">
-                    <h2>Application #<span id="app-id">-</span></h2>
-                    <span id="status-badge" class="status-badge"></span>
-                </div>
+                <div class="status-card">
+                    <div class="status-header">
+                        <h2><span data-i18n="application_status_heading_prefix">Application #</span><span id="app-id">-</span></h2>
+                    </div>
 
                 <!-- Status Timeline -->
                 <div class="timeline-section">
-                    <h3>Application Timeline</h3>
+                    <h3 data-i18n="timeline_title">Application Timeline</h3>
                     <div class="timeline">
                         <div class="timeline-item completed">
                             <div class="timeline-marker"></div>
                             <div class="timeline-content">
-                                <h4>Submitted</h4>
+                                <h4 data-i18n="timeline_submitted">Submitted</h4>
                                 <p id="submitted-date">-</p>
                             </div>
                         </div>
@@ -72,16 +77,16 @@
                         <div class="timeline-item" id="review-timeline">
                             <div class="timeline-marker"></div>
                             <div class="timeline-content">
-                                <h4>Under Review</h4>
-                                <p>Your application is being reviewed by our team</p>
+                                <h4 data-i18n="timeline_under_review">Under Review</h4>
+                                <p data-i18n="timeline_review_description">Your application is being reviewed by our team</p>
                             </div>
                         </div>
 
                         <div class="timeline-item" id="decision-timeline">
                             <div class="timeline-marker"></div>
                             <div class="timeline-content">
-                                <h4>Decision</h4>
-                                <p>Waiting for final decision</p>
+                                <h4 data-i18n="timeline_decision">Decision</h4>
+                                <p data-i18n="timeline_decision_description">Waiting for final decision</p>
                             </div>
                         </div>
                     </div>
@@ -89,22 +94,22 @@
 
                 <!-- Application Details -->
                 <div class="details-section">
-                    <h3>Application Details</h3>
+                    <h3 data-i18n="details_title">Application Details</h3>
                     <div class="details-grid">
                         <div class="detail-item">
-                            <label>Visa Type</label>
+                            <label data-i18n="label_visa_type">Visa Type</label>
                             <p id="visa-type">-</p>
                         </div>
                         <div class="detail-item">
-                            <label>Application ID</label>
+                            <label data-i18n="detail_label_application_id">Application ID</label>
                             <p id="app-id-detail">-</p>
                         </div>
                         <div class="detail-item">
-                            <label>Status</label>
+                            <label data-i18n="th_status">Status</label>
                             <p id="status-detail">-</p>
                         </div>
                         <div class="detail-item">
-                            <label>Submitted Date</label>
+                            <label data-i18n="th_submitted">Submitted Date</label>
                             <p id="submitted-detail">-</p>
                         </div>
                     </div>
@@ -112,31 +117,31 @@
 
                 <!-- Payment Section -->
                 <div class="payment-section">
-                    <h3>Application Fee</h3>
-                    <button class="btn btn-primary" onclick="openPaymentModal()">Pay Now (M-Pesa)</button>
+                    <h3 data-i18n="payment_section_title">Application Fee</h3>
+                    <button class="btn btn-primary" onclick="openPaymentModal()" data-i18n="btn_pay_now">Pay Now (M-Pesa)</button>
                     <div id="payment-status-msg" class="payment-status-msg"></div>
                 </div>
 
                 <!-- Documents Section -->
                 <div class="documents-section">
-                    <h3>Uploaded Documents</h3>
+                    <h3 data-i18n="uploaded_documents_title">Uploaded Documents</h3>
                     <div class="documents-list" id="documents-list">
-                        <p>Loading documents...</p>
+                        <p data-i18n="loading_documents">Loading documents...</p>
                     </div>
                 </div>
 
                 <!-- Messages Section -->
                 <div class="messages-section">
-                    <h3>Messages & Updates</h3>
+                    <h3 data-i18n="messages_updates_title">Messages & Updates</h3>
                     <div class="messages-list" id="messages-list">
-                        <p class="no-messages">No messages yet</p>
+                        <p class="no-messages" data-i18n="no_messages_yet">No messages yet</p>
                     </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="status-actions">
-                    <button class="btn btn-secondary" onclick="downloadStatusPDF()">Download Status Report</button>
-                    <button class="btn btn-secondary" onclick="contactSupport()">Contact Support</button>
+                    <button class="btn btn-secondary" onclick="downloadStatusPDF()" data-i18n="btn_download_status_report">Download Status Report</button>
+                    <button class="btn btn-secondary" onclick="contactSupport()" data-i18n="btn_contact_support">Contact Support</button>
                 </div>
             </div>
         </div>
@@ -163,6 +168,7 @@
         </div>
     </footer>
 
+    <script src="i18n.js"></script>
     <script>
         const API_BASE = 'http://127.0.0.1:8000';
 

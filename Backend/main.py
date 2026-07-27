@@ -1,10 +1,14 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import re
 import shutil
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
-
+from biometrics_routes import router as biometrics_router, user_router
+from biometrics_fingerprint_routes import router as fingerprint_router
 # Ensure this directory is on sys.path so sibling modules
 # (models, crud, schemas, etc.) resolve correctly under Vercel's
 # runtime, where main.py may be imported without Backend/ on the path.
@@ -27,6 +31,9 @@ from database import engine, get_db
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Immigration System API")
+app.include_router(biometrics_router)
+app.include_router(user_router)
+app.include_router(fingerprint_router)
 
 UPLOAD_DIR = "uploaded_documents"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -35,9 +42,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://127.0.0.1:5500",
-        "https://visa-system-delta.vercel.app",
-    ],
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    "https://visa-system-delta.vercel.app",
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,6 +72,11 @@ class TokenData(BaseModel):
 
 class ChatMessage(BaseModel):
     message: str
+
+
+class BiometricLoginRequest(BaseModel):
+    email: str
+    method: str
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -139,7 +152,22 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, user=user)
+    new_user = crud.create_user(db=db, user=user)
+    notifications.send_welcome_email(new_user)
+    return new_user
+
+
+@app.get("/api/users/by-email/{email}")
+def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=email)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "id": db_user.id,
+        "email": db_user.email,
+        "full_name": db_user.full_name,
+        "role": db_user.role,
+    }
 
 
 @app.post("/api/login", response_model=Token)
@@ -147,6 +175,41 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if not db_user or not crud.pwd_context.verify(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    access_token = create_access_token(
+        data={"sub": db_user.email},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": db_user.id,
+            "email": db_user.email,
+            "full_name": db_user.full_name,
+            "role": db_user.role,
+        },
+    }
+
+
+@app.post("/api/login/biometric", response_model=Token)
+def login_biometric(body: BiometricLoginRequest, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=body.email)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    method = (body.method or "").lower()
+    if method == "face":
+        from biometrics_routes import has_face_photo
+        if not has_face_photo(db_user.id):
+            raise HTTPException(status_code=401, detail="No face biometric enrolled for this user yet")
+    elif method == "fingerprint":
+        from biometrics_fingerprint_routes import has_fingerprint_credential
+        if not has_fingerprint_credential(db_user.id):
+            raise HTTPException(status_code=401, detail="No fingerprint biometric enrolled for this user yet")
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported biometric method")
 
     access_token = create_access_token(
         data={"sub": db_user.email},

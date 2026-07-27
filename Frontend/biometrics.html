@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Enrollment - Immigration Visa System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-biometrics">
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>🌍 Kenya Immigration Visa System</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="#" onclick="handleLogout()" class="btn btn-secondary">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="container">
+            <h2>Biometric Enrollment</h2>
+            <p>Enroll fingerprint or face biometrics to use biometric login on the sign-in page.</p>
+
+            <div class="biometric-card">
+                <h3>Fingerprint Enrollment</h3>
+                <p>Enroll your device fingerprint to allow passwordless login later.</p>
+                <button type="button" class="btn btn-primary" id="enroll-fingerprint">Enroll Fingerprint</button>
+                <p id="fingerprint-status" class="form-help" style="margin-top: 12px;">Requires a device with WebAuthn fingerprint support.</p>
+            </div>
+
+            <div class="biometric-card" style="margin-top: 24px;">
+                <h3>Face Enrollment</h3>
+                <p>Capture a live photo for face-based login.</p>
+                <button type="button" class="btn btn-primary" id="start-face">Start Camera</button>
+                <button type="button" class="btn btn-secondary" id="capture-face" style="display:none; margin-left: 12px;">Capture Photo</button>
+                <button type="button" class="btn btn-secondary" id="retake-face" style="display:none; margin-left: 12px;">Retake</button>
+                <div style="margin-top:16px;">
+                    <video id="face-video" autoplay playsinline width="320" height="240" style="display:none; border-radius:8px; background:#000;"></video>
+                    <img id="face-preview" src="" alt="Face preview" style="display:none; width:320px; height:240px; border-radius:8px; object-fit:cover; margin-top:12px;" />
+                    <canvas id="face-canvas" width="320" height="240" style="display:none;"></canvas>
+                </div>
+                <p id="face-status" class="form-help" style="margin-top: 12px;">Your biometric data stays with this application.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Immigration Visa System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+            ? "http://127.0.0.1:8000"
+            : "";
+
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function getUser() {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        function requireAuth() {
+            const token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            return token;
+        }
+
+        async function enrollFingerprint() {
+            const status = document.getElementById('fingerprint-status');
+            const user = getUser();
+            const token = getToken();
+            if (!token || !user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!window.PublicKeyCredential || !navigator.credentials || !navigator.credentials.create) {
+                status.textContent = 'Fingerprint enrollment is not supported in this browser.';
+                return;
+            }
+
+            try {
+                status.textContent = 'Starting fingerprint enrollment...';
+                const startRes = await fetch(`${API_BASE}/api/users/${user.id}/biometrics/fingerprint/register/start`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!startRes.ok) {
+                    const err = await startRes.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Unable to start fingerprint enrollment');
+                }
+                const { publicKey } = await startRes.json();
+                publicKey.challenge = base64urlToBuffer(publicKey.challenge);
+                if (typeof publicKey.user?.id === 'string') {
+                    publicKey.user.id = base64urlToBuffer(publicKey.user.id);
+                }
+                const cred = await navigator.credentials.create({ publicKey });
+                const credentialJSON = credentialToJSON(cred, true);
+                const finishRes = await fetch(`${API_BASE}/api/users/${user.id}/biometrics/fingerprint/register/finish`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ credential: credentialJSON })
+                });
+                if (!finishRes.ok) {
+                    const err = await finishRes.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Fingerprint enrollment failed');
+                }
+                status.textContent = 'Fingerprint enrolled successfully! You can now use fingerprint login on the sign-in page.';
+            } catch (err) {
+                status.textContent = 'Fingerprint enrollment error: ' + err.message;
+            }
+        }
+
+        function bufferToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let str = '';
+            for (const b of bytes) str += String.fromCharCode(b);
+            return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function base64urlToBuffer(base64url) {
+            const padded = base64url.replace(/-/g, '+').replace(/_/g, '/').padEnd(
+                base64url.length + ((4 - (base64url.length % 4)) % 4), '='
+            );
+            const raw = atob(padded);
+            const buffer = new ArrayBuffer(raw.length);
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+            return buffer;
+        }
+
+        function credentialToJSON(cred, isRegistration = false) {
+            const base = { id: cred.id, rawId: bufferToBase64url(cred.rawId), type: cred.type };
+            if (cred.response) {
+                base.response = {
+                    clientDataJSON: bufferToBase64url(cred.response.clientDataJSON)
+                };
+                if (isRegistration) {
+                    base.response.attestationObject = bufferToBase64url(cred.response.attestationObject);
+                } else {
+                    base.response.authenticatorData = bufferToBase64url(cred.response.authenticatorData);
+                    base.response.signature = bufferToBase64url(cred.response.signature);
+                    base.response.userHandle = cred.response.userHandle ? bufferToBase64url(cred.response.userHandle) : null;
+                }
+            }
+            return base;
+        }
+
+        async function uploadFaceBiometric(action, blob) {
+            const status = document.getElementById('face-status');
+            const user = getUser();
+            const token = getToken();
+            if (!token || !user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (!blob) {
+                status.textContent = 'Capture a photo first.';
+                return;
+            }
+            const formData = new FormData();
+            formData.append('photo', blob, 'face.jpg');
+            const response = await fetch(`${API_BASE}/api/users/${user.id}/biometrics/face/register`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || 'Face enrollment failed');
+            }
+            return response.json();
+        }
+
+        function handleCameraError(err) {
+            document.getElementById('face-status').textContent = 'Camera error: ' + err.message;
+        }
+
+        async function startFaceCamera() {
+            const status = document.getElementById('face-status');
+            const video = document.getElementById('face-video');
+            const captureBtn = document.getElementById('capture-face');
+            const retakeBtn = document.getElementById('retake-face');
+            const preview = document.getElementById('face-preview');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                preview.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                retakeBtn.style.display = 'none';
+                status.textContent = 'Camera ready. Click capture to take your photo.';
+            } catch (err) {
+                handleCameraError(err);
+            }
+        }
+
+        async function captureFacePhoto() {
+            const status = document.getElementById('face-status');
+            const video = document.getElementById('face-video');
+            const canvas = document.getElementById('face-canvas');
+            const preview = document.getElementById('face-preview');
+            const captureBtn = document.getElementById('capture-face');
+            const retakeBtn = document.getElementById('retake-face');
+            const stream = video.srcObject;
+            if (!stream) {
+                status.textContent = 'Camera is not started yet.';
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+            if (!blob) {
+                status.textContent = 'Unable to capture image. Please try again.';
+                return;
+            }
+
+            preview.src = URL.createObjectURL(blob);
+            preview.style.display = 'block';
+            video.style.display = 'none';
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'inline-block';
+
+            try {
+                await uploadFaceBiometric('register', blob);
+                status.textContent = 'Face enrolled successfully! You can now use face login on the sign-in page.';
+            } catch (err) {
+                status.textContent = 'Face enrollment failed: ' + err.message;
+            }
+        }
+
+        function resetFaceCamera() {
+            document.getElementById('face-status').textContent = 'Ready to start the camera again.';
+            document.getElementById('face-video').style.display = 'none';
+            document.getElementById('face-preview').style.display = 'none';
+            document.getElementById('capture-face').style.display = 'none';
+            document.getElementById('retake-face').style.display = 'none';
+            document.getElementById('face-video').srcObject = null;
+        }
+
+        window.addEventListener('load', () => {
+            const token = requireAuth();
+            if (!token) return;
+            const user = getUser();
+            if (user.full_name) {
+                document.title = `Biometric Enrollment - ${user.full_name}`;
+            }
+            document.getElementById('enroll-fingerprint').addEventListener('click', enrollFingerprint);
+            document.getElementById('start-face').addEventListener('click', startFaceCamera);
+            document.getElementById('capture-face').addEventListener('click', captureFacePhoto);
+            document.getElementById('retake-face').addEventListener('click', resetFaceCamera);
+        });
+    </script>
+</body>
+</html>
